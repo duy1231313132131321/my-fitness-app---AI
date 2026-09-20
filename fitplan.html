@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FitPlan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF9F6;
+    --card:#FFFFFF;
+    --ink:#201F1D;
+    --ink-soft:#5B5854;
+    --line:#E4E0D8;
+    --line-soft:#EEEBE4;
+    --indigo:#33406B;
+    --indigo-soft:#E8EAF1;
+    --clay:#C1502E;
+    --clay-soft:#F5E4DC;
+    --moss:#59713F;
+    --moss-soft:#E7EDDE;
+    --plum:#6B4058;
+    --plum-soft:#EEE2E8;
+    --danger:#B23A3A;
+    --radius-sm:4px;
+    --radius-md:10px;
+    --radius-lg:20px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:#E9E5DC;
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100vh;
+    padding:28px 12px;
+  }
+  h1,h2,h3,.numeral{font-family:'Fraunces',Georgia,serif;}
+  .app-shell{width:100%;max-width:420px;}
+  .phone{
+    background:var(--paper);
+    border-radius:32px;
+    border:1px solid #D8D3C8;
+    box-shadow:0 30px 60px -20px rgba(32,31,29,0.35);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height:844px;
+    max-height:88vh;
+    position:relative;
+  }
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 24px 4px;
+    font-size:13px;
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+    flex-shrink:0;
+  }
+  .screen{
+    flex:1;
+    overflow-y:auto;
+    padding:8px 22px 24px;
+    scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{display:none;}
+  .bottomnav{
+    flex-shrink:0;
+    display:flex;
+    border-top:1px solid var(--line);
+    background:var(--card);
+    padding:8px 6px calc(10px + env(safe-area-inset-bottom,0px));
+  }
+  .navitem{
+    flex:1;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:none;border:none;font-family:inherit;
+    padding:6px 2px;
+    cursor:pointer;
+    color:#B7B2A8;
+    font-size:11.5px;
+  }
+  .navitem .navicon{font-size:19px;line-height:1;}
+  .navitem.active{color:var(--ink);}
+  .navitem.active .navicon{transform:translateY(-1px);}
+  .navitem[data-tab="home"].active{color:var(--ink);}
+  .navitem[data-tab="workout"].active{color:var(--clay);}
+  .navitem[data-tab="meals"].active{color:var(--moss);}
+  .navitem[data-tab="progress"].active{color:var(--plum);}
+  .navitem[data-tab="profile"].active{color:var(--indigo);}
+
+  .eyebrow{font-size:13px;color:var(--ink-soft);margin:0 0 2px;}
+  .h-page{font-size:26px;font-weight:600;margin:2px 0 18px;letter-spacing:-0.01em;}
+  .h-section{font-size:15px;font-weight:600;margin:0 0 10px;display:flex;align-items:center;justify-content:space-between;}
+  p{line-height:1.5;}
+  .muted{color:var(--ink-soft);}
+  .small{font-size:13px;}
+
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-size:15px;font-weight:600;
+    border-radius:var(--radius-sm);
+    padding:13px 18px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+    width:100%;
+    text-align:center;
+  }
+  .btn:active{opacity:0.8;}
+  .btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border:none;font-weight:500;}
+  .btn.small-btn{width:auto;padding:8px 14px;font-size:13px;}
+  .btn.clay{background:var(--clay);border-color:var(--clay);}
+  .btn.moss{background:var(--moss);border-color:var(--moss);}
+  .btn.indigo{background:var(--indigo);border-color:var(--indigo);}
+  .btn.plum{background:var(--plum);border-color:var(--plum);}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .row{display:flex;gap:10px;}
+  .col{flex:1;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:6px;}
+  .field input[type=text],.field input[type=number],.field select,.field textarea{
+    width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);
+    font-family:inherit;font-size:15px;background:var(--card);color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:60px;}
+  .seg{display:flex;flex-wrap:wrap;gap:8px;}
+  .seg-opt{
+    border:1px solid var(--line);background:var(--card);border-radius:var(--radius-md);
+    padding:12px 14px;cursor:pointer;font-size:14px;flex:1 1 auto;text-align:center;min-width:80px;
+  }
+  .seg-opt.wide{flex-basis:100%;text-align:left;display:flex;align-items:center;gap:10px;}
+  .seg-opt .opt-title{font-weight:600;font-size:14.5px;}
+  .seg-opt .opt-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .seg-opt.selected{border-color:var(--ink);background:#F1EFE9;}
+  .seg-opt.selected.c-indigo{border-color:var(--indigo);background:var(--indigo-soft);}
+  .seg-opt.selected.c-clay{border-color:var(--clay);background:var(--clay-soft);}
+  .seg-opt.selected.c-moss{border-color:var(--moss);background:var(--moss-soft);}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--line);border-radius:20px;padding:8px 13px;font-size:13px;cursor:pointer;background:var(--card);
+  }
+  .chip.selected{border-color:var(--ink);background:#F1EFE9;}
+  .chip input{margin:0;}
+
+  .divider{height:1px;background:var(--line);margin:18px 0;border:none;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;}
+  .card.flat{border-radius:var(--radius-md);}
+
+  .progress-track{height:6px;background:var(--line-soft);border-radius:6px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:6px;background:var(--ink);}
+  .progress-fill.clay{background:var(--clay);}
+  .progress-fill.moss{background:var(--moss);}
+  .progress-fill.indigo{background:var(--indigo);}
+  .progress-fill.plum{background:var(--plum);}
+
+  .metric-num{font-size:34px;font-weight:600;line-height:1;}
+  .metric-label{font-size:12.5px;color:var(--ink-soft);margin-top:4px;}
+  .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .onboard-progress{display:flex;gap:5px;margin:10px 0 20px;}
+  .onboard-progress span{flex:1;height:3px;border-radius:3px;background:var(--line);}
+  .onboard-progress span.done{background:var(--ink);}
+  .onboard-step{animation:slideIn .32s ease;}
+  @keyframes slideIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:translateX(0);}}
+
+  .weekcal{display:flex;gap:5px;margin-bottom:16px;}
+  .daybox{flex:1;text-align:center;padding:9px 2px;border-radius:10px;background:var(--card);border:1px solid var(--line);cursor:pointer;}
+  .daybox .dname{font-size:11px;color:var(--ink-soft);}
+  .daybox .dmark{font-size:15px;margin-top:3px;}
+  .daybox.today{border-color:var(--clay);}
+  .daybox.selected{background:var(--clay-soft);border-color:var(--clay);}
+
+  .exrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-soft);cursor:pointer;}
+  .exrow:last-child{border-bottom:none;}
+  .exnum{width:26px;height:26px;border-radius:50%;background:var(--clay-soft);color:var(--clay);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+  .exname{font-weight:600;font-size:14.5px;}
+  .exsub{font-size:12.5px;color:var(--ink-soft);}
+
+  .mealcard{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line-soft);}
+  .mealcard:last-child{border-bottom:none;}
+  .mealtag{font-size:11.5px;color:var(--moss);font-weight:600;}
+  .mealname{font-weight:600;font-size:15px;margin:2px 0 3px;cursor:pointer;}
+  .mealkcal{font-size:12.5px;color:var(--ink-soft);}
+  .checkbtn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);flex-shrink:0;cursor:pointer;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:14px;color:transparent;}
+  .checkbtn.done{background:var(--moss);border-color:var(--moss);color:#fff;}
+
+  .modal-overlay{position:absolute;inset:0;background:rgba(32,31,29,0.55);display:flex;align-items:flex-end;z-index:50;}
+  .modal-sheet{background:var(--paper);width:100%;max-height:92%;border-radius:22px 22px 0 0;padding:20px 22px 26px;overflow-y:auto;animation:sheetUp .28s ease;}
+  @keyframes sheetUp{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .modal-close{background:none;border:none;font-size:14px;color:var(--ink-soft);cursor:pointer;padding:4px 0;}
+  .fullscreen-modal{position:absolute;inset:0;background:var(--paper);z-index:60;display:flex;flex-direction:column;padding:18px 22px 22px;}
+
+  .setpill{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;}
+  .setpill.done{background:var(--clay);border-color:var(--clay);color:#fff;}
+  .rest-ring{font-size:52px;font-weight:600;text-align:center;font-family:'Fraunces',serif;}
+
+  .weight-chip{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:14px;}
+  .weight-chip:last-child{border-bottom:none;}
+
+  .banner{border-radius:var(--radius-md);padding:13px 14px;font-size:13.5px;margin-bottom:14px;line-height:1.45;}
+  .banner.warn{background:var(--clay-soft);color:#7A3416;}
+  .banner.info{background:var(--indigo-soft);color:var(--indigo);}
+
+  ::selection{background:#DCD5C4;}
+  input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--indigo);outline-offset:1px;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="phone">
+    <div class="statusbar"><span id="clock">9:41</span><span>FitPlan</span></div>
+    <div class="screen" id="screen"></div>
+    <nav class="bottomnav" id="bottomnav" style="display:none;"></nav>
+  </div>
+</div>
+<div id="modal-root"></div>
+
+<script>
+/* ================= DATA ================= */
+const EXLIB = [
+  {id:'pushup',name:'Chống đẩy',group:'nguc',equip:['none'],loc:['home','gym','outdoor'],diff:'Cơ bản',sets:3,reps:'12',rest:60,cue:'Giữ thân người thành một đường thẳng, hạ ngực gần sàn.',mistake:'Võng lưng hoặc chổng mông cao.',alt:['knee-pushup','wall-pushup']},
+  {id:'knee-pushup',name:'Chống đẩy gối',group:'nguc',equip:['none'],loc:['home','gym','outdoor'],diff:'Mới bắt đầu',sets:3,reps:'12',rest:45,cue:'Chống gối xuống sàn, giữ lưng thẳng.',mistake:'Đẩy hông lên trước khi tay duỗi thẳng.',alt:['wall-pushup']},
+  {id:'wall-pushup',name:'Chống đẩy tường',group:'nguc',equip:['none'],loc:['home','gym','outdoor'],diff:'Mới bắt đầu',sets:3,reps:'15',rest:40,cue:'Đứng cách tường một sải tay, hạ ngực về phía tường.',mistake:'Đứng quá gần tường làm giảm biên độ.',alt:[]},
+  {id:'db-bench',name:'Đẩy ngực tạ đơn',group:'nguc',equip:['dumbbell'],loc:['home','gym'],diff:'Trung bình',sets:4,reps:'10',rest:75,cue:'Hạ tạ ngang ngực, đẩy lên kiểm soát.',mistake:'Duỗi khuỷu tay quá nhanh gây mất kiểm soát.',alt:['pushup']},
+  {id:'bench-press',name:'Đẩy ngực đòn tạ',group:'nguc',equip:['barbell'],loc:['gym'],diff:'Trung bình',sets:4,reps:'8',rest:90,cue:'Hạ đòn tạ chạm ngực nhẹ, đẩy thẳng lên.',mistake:'Nảy đòn tạ trên ngực.',alt:['db-bench']},
+  {id:'db-row',name:'Chèo tạ đơn một tay',group:'lung',equip:['dumbbell'],loc:['home','gym'],diff:'Cơ bản',sets:3,reps:'10',rest:60,cue:'Kéo tạ về hông, giữ lưng thẳng song song sàn.',mistake:'Xoay hông thay vì dùng lưng để kéo.',alt:['band-row']},
+  {id:'band-row',name:'Chèo dây kháng lực',group:'lung',equip:['band'],loc:['home','outdoor'],diff:'Cơ bản',sets:3,reps:'15',rest:45,cue:'Kéo dây về phía bụng, ép hai bả vai.',mistake:'Dùng lực tay thay vì lưng.',alt:['superman']},
+  {id:'superman',name:'Superman',group:'lung',equip:['none'],loc:['home','outdoor'],diff:'Mới bắt đầu',sets:3,reps:'15',rest:40,cue:'Nằm sấp, nâng đồng thời tay và chân lên khỏi sàn.',mistake:'Ngẩng cổ quá cao gây mỏi cổ.',alt:[]},
+  {id:'lat-pulldown',name:'Kéo xô cáp',group:'lung',equip:['machine'],loc:['gym'],diff:'Trung bình',sets:4,reps:'10',rest:75,cue:'Kéo thanh xuống ngang cằm, ép xô.',mistake:'Ngả người ra sau quá nhiều.',alt:['db-row']},
+  {id:'deadlift',name:'Deadlift đòn tạ',group:'lung',equip:['barbell'],loc:['gym'],diff:'Nâng cao',sets:4,reps:'6',rest:100,cue:'Giữ lưng thẳng, đẩy hông về sau khi cúi.',mistake:'Cong lưng dưới khi nâng tạ.',alt:['db-row']},
+  {id:'squat',name:'Squat',group:'chan',equip:['none'],loc:['home','gym','outdoor'],diff:'Cơ bản',sets:4,reps:'15',rest:60,cue:'Hạ hông xuống như ngồi ghế, đầu gối theo hướng mũi chân.',mistake:'Đầu gối đổ vào trong.',alt:['wall-sit']},
+  {id:'wall-sit',name:'Ngồi tựa tường',group:'chan',equip:['none'],loc:['home'],diff:'Mới bắt đầu',sets:3,reps:'30 giây',rest:45,cue:'Lưng áp tường, đùi song song sàn.',mistake:'Đầu gối vượt quá mũi chân.',alt:[]},
+  {id:'lunge',name:'Lunge bước tới',group:'chan',equip:['none'],loc:['home','gym','outdoor'],diff:'Cơ bản',sets:3,reps:'12 mỗi bên',rest:60,cue:'Bước dài, hạ gối sau gần sàn.',mistake:'Bước quá ngắn làm mất thăng bằng.',alt:['step-up']},
+  {id:'step-up',name:'Bước bục',group:'chan',equip:['none'],loc:['home','outdoor'],diff:'Cơ bản',sets:3,reps:'12 mỗi bên',rest:50,cue:'Bước lên bục, đẩy qua gót chân trên bục.',mistake:'Đẩy bằng chân trụ dưới đất.',alt:['lunge']},
+  {id:'db-squat',name:'Squat tạ đơn',group:'chan',equip:['dumbbell'],loc:['home','gym'],diff:'Trung bình',sets:4,reps:'12',rest:70,cue:'Giữ tạ trước ngực, hạ hông thấp.',mistake:'Cong lưng khi hạ xuống.',alt:['squat']},
+  {id:'leg-press',name:'Đạp đùi máy',group:'chan',equip:['machine'],loc:['gym'],diff:'Trung bình',sets:4,reps:'12',rest:75,cue:'Đạp đều hai chân, không khóa cứng gối.',mistake:'Khóa gối hoàn toàn ở điểm cuối.',alt:['db-squat']},
+  {id:'glute-bridge',name:'Nâng hông',group:'chan',equip:['none'],loc:['home'],diff:'Mới bắt đầu',sets:3,reps:'15',rest:40,cue:'Siết mông đẩy hông lên cao.',mistake:'Ưỡn lưng dưới quá mức.',alt:['squat']},
+  {id:'shoulder-press',name:'Đẩy vai tạ đơn',group:'vai',equip:['dumbbell'],loc:['home','gym'],diff:'Trung bình',sets:3,reps:'10',rest:70,cue:'Đẩy tạ thẳng lên trên đầu, hạ về ngang tai.',mistake:'Ưỡn lưng để đẩy tạ lên.',alt:['pike-pushup']},
+  {id:'pike-pushup',name:'Chống đẩy chữ V',group:'vai',equip:['none'],loc:['home','outdoor'],diff:'Trung bình',sets:3,reps:'10',rest:55,cue:'Gập hông cao, hạ đỉnh đầu về phía sàn.',mistake:'Chân quá gần tay làm mất góc vai.',alt:['wall-pushup']},
+  {id:'lateral-raise',name:'Nâng tạ ngang vai',group:'vai',equip:['dumbbell'],loc:['home','gym'],diff:'Cơ bản',sets:3,reps:'12',rest:50,cue:'Nâng tạ ngang vai, khuỷu tay hơi cong.',mistake:'Dùng đà lắc người để nâng.',alt:['band-row']},
+  {id:'bicep-curl',name:'Gập tay trước',group:'tay',equip:['dumbbell'],loc:['home','gym'],diff:'Cơ bản',sets:3,reps:'12',rest:45,cue:'Giữ khuỷu tay sát người, gập tạ lên.',mistake:'Đung đưa vai để tạo đà.',alt:['band-curl']},
+  {id:'band-curl',name:'Gập tay dây kháng lực',group:'tay',equip:['band'],loc:['home','outdoor'],diff:'Cơ bản',sets:3,reps:'15',rest:40,cue:'Đứng lên dây, gập tay kiểm soát.',mistake:'Thả dây quá nhanh khi hạ tay.',alt:['bicep-curl']},
+  {id:'tricep-dip',name:'Gập tay sau trên ghế',group:'tay',equip:['none'],loc:['home','outdoor'],diff:'Trung bình',sets:3,reps:'12',rest:50,cue:'Hạ người thẳng xuống, khuỷu tay hướng ra sau.',mistake:'Đẩy vai lên tai khi hạ người.',alt:['tricep-pushup']},
+  {id:'tricep-pushup',name:'Chống đẩy tay hẹp',group:'tay',equip:['none'],loc:['home','gym','outdoor'],diff:'Trung bình',sets:3,reps:'10',rest:55,cue:'Tay đặt hẹp hơn vai, khuỷu ép sát thân.',mistake:'Khuỷu tay mở rộng ra ngoài.',alt:['knee-pushup']},
+  {id:'plank',name:'Plank',group:'bung',equip:['none'],loc:['home','gym','outdoor'],diff:'Cơ bản',sets:3,reps:'40 giây',rest:40,cue:'Giữ thân thẳng từ vai đến gót chân.',mistake:'Võng hông xuống thấp.',alt:['knee-plank']},
+  {id:'knee-plank',name:'Plank chống gối',group:'bung',equip:['none'],loc:['home'],diff:'Mới bắt đầu',sets:3,reps:'30 giây',rest:35,cue:'Chống gối, giữ lưng thẳng.',mistake:'Nâng mông quá cao.',alt:[]},
+  {id:'russian-twist',name:'Xoay người Nga',group:'bung',equip:['none'],loc:['home','outdoor'],diff:'Cơ bản',sets:3,reps:'20',rest:40,cue:'Ngồi nghiêng người ra sau, xoay eo hai bên.',mistake:'Xoay bằng tay thay vì eo.',alt:['plank']},
+  {id:'bird-dog',name:'Bird dog',group:'bung',equip:['none'],loc:['home'],diff:'Mới bắt đầu',sets:3,reps:'12 mỗi bên',rest:35,cue:'Duỗi tay và chân đối diện, giữ lưng ổn định.',mistake:'Xoay hông theo tay đang duỗi.',alt:['knee-plank']},
+  {id:'mountain-climber',name:'Leo núi',group:'cardio',equip:['none'],loc:['home','gym','outdoor'],diff:'Cơ bản',sets:3,reps:'30 giây',rest:40,cue:'Giữ hông thấp, đưa gối về ngực nhanh.',mistake:'Nâng hông quá cao làm mất hiệu quả.',alt:['jumping-jack']},
+  {id:'jumping-jack',name:'Nhảy dang tay chân',group:'cardio',equip:['none'],loc:['home','outdoor'],diff:'Mới bắt đầu',sets:3,reps:'30 giây',rest:35,cue:'Nhảy nhịp nhàng, tiếp đất nhẹ nhàng bằng mũi chân.',mistake:'Tiếp đất bằng cả bàn chân gây áp lực khớp gối.',alt:['mountain-climber']},
+  {id:'burpee',name:'Burpee',group:'cardio',equip:['none'],loc:['home','gym','outdoor'],diff:'Trung bình',sets:3,reps:'10',rest:60,cue:'Squat, bật ra plank, bật trở lại rồi nhảy lên.',mistake:'Làm quá nhanh mất kiểm soát tư thế.',alt:['jumping-jack']},
+  {id:'calf-raise',name:'Nâng gót chân',group:'chan',equip:['none'],loc:['home','gym','outdoor'],diff:'Mới bắt đầu',sets:3,reps:'20',rest:35,cue:'Nhón gót lên cao, hạ chậm.',mistake:'Nhún gối để tạo đà.',alt:[]},
+];
+
+const MEALLIB = [
+  {id:'b1',type:'breakfast',diet:['any'],allergens:['egg','dairy'],name:'Yến mạch, chuối và trứng',kcal:420,p:22,c:55,f:14,ing:['80g yến mạch','1 quả chuối','2 quả trứng','200ml sữa tươi'],steps:['Nấu yến mạch với sữa tươi trong 5 phút.','Luộc hoặc chiên trứng.','Cắt chuối, trộn cùng yến mạch, ăn kèm trứng.']},
+  {id:'b2',type:'breakfast',diet:['any'],allergens:['egg','gluten'],name:'Bánh mì trứng ốp la',kcal:380,p:18,c:45,f:14,ing:['1 ổ bánh mì','2 quả trứng','Rau sống','1 thìa dầu ăn'],steps:['Chiên trứng ốp la với chút dầu.','Kẹp trứng và rau sống vào bánh mì.']},
+  {id:'b3',type:'breakfast',diet:['any'],allergens:['peanut','dairy'],name:'Sinh tố chuối bơ đậu phộng',kcal:450,p:25,c:50,f:16,ing:['1 quả chuối','1 thìa bơ đậu phộng','200ml sữa','1 muỗng whey protein'],steps:['Cho tất cả nguyên liệu vào máy xay.','Xay nhuyễn và dùng ngay.']},
+  {id:'b4',type:'breakfast',diet:['vegan','vegetarian','any'],allergens:[],name:'Cháo yến mạch đậu nành',kcal:350,p:15,c:55,f:8,ing:['80g yến mạch','200ml sữa đậu nành','1 thìa hạt chia'],steps:['Nấu yến mạch với sữa đậu nành 5 phút.','Rắc hạt chia lên trên trước khi ăn.']},
+  {id:'b5',type:'breakfast',diet:['vegetarian','any'],allergens:['dairy'],name:'Sữa chua Hy Lạp và trái cây',kcal:300,p:18,c:40,f:6,ing:['200g sữa chua Hy Lạp','1 quả táo','1 thìa mật ong','Hạt granola'],steps:['Cắt trái cây thành miếng nhỏ.','Trộn cùng sữa chua, rưới mật ong và granola.']},
+  {id:'b6',type:'breakfast',diet:['vegan','vegetarian','any'],allergens:['peanut','gluten'],name:'Bánh mì bơ đậu phộng chuối',kcal:400,p:14,c:55,f:14,ing:['2 lát bánh mì nguyên cám','1.5 thìa bơ đậu phộng','1 quả chuối'],steps:['Phết bơ đậu phộng lên bánh mì.','Xếp chuối cắt lát lên trên.']},
+  {id:'l1',type:'lunch',diet:['any'],allergens:[],name:'Cơm ức gà bông cải',kcal:650,p:45,c:70,f:18,ing:['150g ức gà','150g cơm gạo lứt','150g bông cải xanh','1 thìa dầu ô liu'],steps:['Áp chảo ức gà với gia vị.','Hấp bông cải xanh.','Dọn cùng cơm gạo lứt.']},
+  {id:'l2',type:'lunch',diet:['any'],allergens:['seafood'],name:'Cơm cá hồi rau củ',kcal:680,p:40,c:65,f:22,ing:['150g cá hồi','150g cơm','Rau củ hấp','1 thìa dầu ô liu'],steps:['Áp chảo cá hồi hai mặt.','Hấp rau củ.','Dọn cùng cơm.']},
+  {id:'l3',type:'lunch',diet:['vegan','vegetarian','any'],allergens:['gluten'],name:'Bún đậu phụ rau',kcal:550,p:28,c:75,f:14,ing:['150g đậu phụ','Bún tươi','Rau sống','Nước chấm chay'],steps:['Chiên vàng đậu phụ.','Trụng bún, dọn cùng rau sống và nước chấm.']},
+  {id:'l4',type:'lunch',diet:['any'],allergens:[],name:'Cơm bò xào rau',kcal:700,p:42,c:68,f:24,ing:['150g thịt bò','Rau củ thập cẩm','150g cơm','Tỏi, gia vị'],steps:['Xào bò chín tới với tỏi.','Xào rau củ riêng.','Dọn cùng cơm.']},
+  {id:'l5',type:'lunch',diet:['any'],allergens:[],name:'Salad gà quinoa',kcal:580,p:40,c:55,f:16,ing:['130g ức gà','80g quinoa','Rau xà lách, cà chua','Sốt dầu giấm'],steps:['Luộc quinoa.','Áp chảo ức gà, cắt lát.','Trộn cùng rau và sốt.']},
+  {id:'l6',type:'lunch',diet:['vegan','vegetarian','any'],allergens:['soy'],name:'Đậu hũ sốt cà chua, cơm gạo lứt',kcal:520,p:24,c:78,f:10,ing:['150g đậu hũ','Cà chua','150g cơm gạo lứt'],steps:['Sốt cà chua cùng đậu hũ.','Dọn cùng cơm gạo lứt.']},
+  {id:'d1',type:'dinner',diet:['any'],allergens:['seafood'],name:'Cá hồi áp chảo khoai lang',kcal:600,p:38,c:50,f:22,ing:['150g cá hồi','150g khoai lang','Bông cải xanh'],steps:['Áp chảo cá hồi.','Hấp khoai lang và bông cải.']},
+  {id:'d2',type:'dinner',diet:['any'],allergens:[],name:'Ức gà nướng salad',kcal:520,p:42,c:35,f:18,ing:['150g ức gà','Rau trộn salad','Sốt dầu giấm'],steps:['Ướp và nướng ức gà.','Trộn cùng rau salad và sốt.']},
+  {id:'d3',type:'dinner',diet:['vegan','vegetarian','any'],allergens:['soy'],name:'Đậu phụ xào nấm rau củ',kcal:480,p:22,c:55,f:14,ing:['150g đậu phụ','Nấm các loại','Rau củ thập cẩm'],steps:['Xào đậu phụ săn vàng.','Cho nấm và rau củ vào xào chung.']},
+  {id:'d4',type:'dinner',diet:['any'],allergens:[],name:'Canh thịt bằm rau củ với cơm',kcal:550,p:30,c:60,f:16,ing:['100g thịt heo bằm','Rau củ','100g cơm'],steps:['Nấu canh thịt bằm với rau củ.','Dọn cùng cơm.']},
+  {id:'d5',type:'dinner',diet:['any'],allergens:['seafood'],name:'Tôm hấp bông cải khoai tây',kcal:500,p:35,c:45,f:16,ing:['150g tôm','Khoai tây','Bông cải xanh'],steps:['Hấp tôm chín tới.','Hấp khoai tây và bông cải.']},
+  {id:'d6',type:'dinner',diet:['vegan','vegetarian','any'],allergens:[],name:'Súp đậu lăng rau củ',kcal:420,p:22,c:60,f:8,ing:['100g đậu lăng','Cà rốt, cần tây, hành tây'],steps:['Nấu đậu lăng với rau củ đến khi mềm.','Nêm nếm vừa ăn.']},
+  {id:'s1',type:'snack',diet:['vegetarian','any'],allergens:['dairy','gluten'],name:'Sữa chua Hy Lạp và granola',kcal:220,p:15,c:25,f:6,ing:['150g sữa chua Hy Lạp','30g granola'],steps:['Trộn sữa chua với granola.']},
+  {id:'s2',type:'snack',diet:['vegan','vegetarian','any'],allergens:['peanut'],name:'Trái cây và hạt hạnh nhân',kcal:200,p:6,c:25,f:9,ing:['1 quả táo hoặc lê','20g hạnh nhân'],steps:['Dùng trực tiếp như bữa phụ.']},
+  {id:'s3',type:'snack',diet:['any'],allergens:['dairy'],name:'Sữa lắc protein',kcal:150,p:25,c:6,f:3,ing:['1 muỗng whey protein','200ml sữa tách béo'],steps:['Lắc đều whey với sữa trong bình lắc.']},
+  {id:'s4',type:'snack',diet:['vegan','vegetarian','any'],allergens:['peanut'],name:'Chuối và bơ đậu phộng',kcal:250,p:8,c:30,f:11,ing:['1 quả chuối','1 thìa bơ đậu phộng'],steps:['Phết bơ đậu phộng lên chuối cắt lát.']},
+];
+
+const GOAL_LABELS = {fat_loss:'Giảm cân / giảm mỡ',muscle_gain:'Tăng cơ',maintain:'Duy trì cân nặng',fitness:'Cải thiện thể lực',health:'Theo dõi sức khỏe'};
+const ACTIVITY_LABELS = {sedentary:'Ít vận động',light:'Nhẹ',moderate:'Vừa',high:'Cao',veryhigh:'Rất cao'};
+const ACTIVITY_MULT = {sedentary:1.2,light:1.375,moderate:1.55,high:1.725,veryhigh:1.9};
+const WEEKDAYS = ['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','Chủ nhật'];
+
+/* ================= STATE ================= */
+let state = {
+  onboarded:false,
+  obStep:0,
+  currentTab:'home',
+  profile:{name:'',age:'',sex:'nam',height:'',weight:''},
+  activity:'moderate',
+  goal:null,
+  workoutPrefs:{days:3,duration:30,location:'home',equipment:['none']},
+  foodPrefs:{diet:'unrestricted',allergies:[],dislikes:'',budget:'medium'},
+  metrics:null,
+  plan:{workoutWeek:null,mealDay:null},
+  logs:{weightHistory:[],workoutHistory:[]},
+  today:{mealsLogged:{},workoutDone:false},
+  session:null,
+  selectedDayIndex:0,
+};
+
+/* ================= PERSISTENCE (localStorage) ================= */
+const STORAGE_KEY = 'fitplan_state_v1';
+
+function saveState(){
+  try{
+    const snapshot = {
+      onboarded: state.onboarded,
+      obStep: state.obStep,
+      currentTab: state.currentTab,
+      profile: state.profile,
+      activity: state.activity,
+      goal: state.goal,
+      workoutPrefs: state.workoutPrefs,
+      foodPrefs: state.foodPrefs,
+      metrics: state.metrics,
+      plan: state.plan,
+      logs: {
+        weightHistory: state.logs.weightHistory,
+        workoutHistory: state.logs.workoutHistory,
+      },
+      today: state.today,
+      selectedDayIndex: state.selectedDayIndex,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  }catch(e){
+    console.warn('Không thể lưu trạng thái:', e);
+  }
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    if(data.logs){
+      if(Array.isArray(data.logs.weightHistory)){
+        data.logs.weightHistory = data.logs.weightHistory.map(h=>({...h, date: h.date ? new Date(h.date) : new Date()}));
+      }
+      if(Array.isArray(data.logs.workoutHistory)){
+        data.logs.workoutHistory = data.logs.workoutHistory.map(h=>({...h, date: h.date ? new Date(h.date) : new Date()}));
+      }
+    }
+    state = Object.assign({}, state, data, {session:null});
+    return true;
+  }catch(e){
+    console.warn('Không thể đọc trạng thái đã lưu:', e);
+    return false;
+  }
+}
+
+function clearState(){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+}
+
+function todayIndex(){ const d=new Date().getDay(); return d===0?6:d-1; }
+
+/* ================= CALC ENGINE ================= */
+function calcMetrics(){
+  const w=parseFloat(state.profile.weight), h=parseFloat(state.profile.height), a=parseInt(state.profile.age);
+  const bmi = w/((h/100)*(h/100));
+  const bmr = state.profile.sex==='nam' ? (10*w+6.25*h-5*a+5) : (10*w+6.25*h-5*a-161);
+  const tdee = bmr*ACTIVITY_MULT[state.activity];
+  const isMinor = a<18;
+  let target, note=null;
+  if(isMinor){
+    target = tdee;
+    note = 'Bạn dưới 18 tuổi nên FitPlan chưa tự đặt mục tiêu giảm cân hoặc tăng cân cho bạn. Mức năng lượng bên dưới là mức duy trì; hãy trao đổi với phụ huynh hoặc chuyên gia y tế nếu muốn thay đổi cân nặng.';
+  } else if(state.goal==='fat_loss'){
+    const deficit = Math.min(500, tdee*0.2);
+    target = Math.max(tdee-deficit, Math.max(1200, bmr*1.05));
+  } else if(state.goal==='muscle_gain'){
+    target = tdee + Math.min(300, tdee*0.15);
+  } else {
+    target = tdee;
+  }
+  const proteinPerKg = state.goal==='muscle_gain'?2.2 : state.goal==='fat_loss'?2.0 : 1.6;
+  const protein = Math.round(proteinPerKg*w);
+  const fat = Math.round((0.25*target)/9);
+  const carbs = Math.max(0, Math.round((target - protein*4 - fat*9)/4));
+  let bmiLabel, bmiPos;
+  if(bmi<18.5){bmiLabel='Thiếu cân';bmiPos=(bmi/18.5)*25;}
+  else if(bmi<25){bmiLabel='Bình thường';bmiPos=25+((bmi-18.5)/6.5)*25;}
+  else if(bmi<30){bmiLabel='Thừa cân';bmiPos=50+((bmi-25)/5)*25;}
+  else {bmiLabel='Béo phì';bmiPos=Math.min(100,75+((bmi-30)/8)*25);}
+  state.metrics = {bmi:+bmi.toFixed(1), bmiLabel, bmiPos:Math.min(100,Math.max(0,bmiPos)), bmr:Math.round(bmr), tdee:Math.round(tdee), target:Math.round(target), protein, carbs, fat, isMinor, note};
+}
+
+/* ================= PLAN GENERATION ================= */
+const SLOTS = {
+  full:['chan','nguc','lung','vai','tay','bung','cardio'],
+  upper:['nguc','lung','vai','tay','bung','lung','vai'],
+  lower:['chan','chan','bung','cardio','chan','bung','chan'],
+  push:['nguc','vai','tay','nguc','bung','vai','tay'],
+  pull:['lung','tay','lung','vai','bung','lung','tay'],
+};
+function dayPattern(days){
+  if(days<=2) return ['full','rest','full','rest','rest','rest','rest'];
+  if(days===3) return ['full','rest','full','rest','full','rest','rest'];
+  if(days===4) return ['upper','lower','rest','upper','lower','rest','rest'];
+  if(days===5) return ['push','pull','lower','rest','push','pull','rest'];
+  return ['push','pull','lower','push','pull','lower','rest'];
+}
+function exCountFromDuration(duration){
+  if(duration<=20) return 4;
+  if(duration<=30) return 5;
+  if(duration<=45) return 6;
+  return 7;
+}
+function pickExercise(group, usedIds, equipment, location){
+  let pool = EXLIB.filter(e=>e.group===group && !usedIds.has(e.id) && e.loc.includes(location) && e.equip.some(eq=>equipment.includes(eq)));
+  if(pool.length===0){
+    pool = EXLIB.filter(e=>e.group===group && !usedIds.has(e.id) && e.equip.includes('none'));
+  }
+  if(pool.length===0){
+    pool = EXLIB.filter(e=>e.group===group && e.equip.includes('none'));
+  }
+  return pool[0] || null;
+}
+function generateWorkoutPlan(){
+  const prefs = state.workoutPrefs;
+  const pattern = dayPattern(prefs.days);
+  const count = exCountFromDuration(prefs.duration);
+  const week = pattern.map((type,i)=>{
+    if(type==='rest') return {day:WEEKDAYS[i], type:'rest', exercises:[]};
+    const slots = SLOTS[type].slice(0,count);
+    const used = new Set();
+    const exercises = [];
+    slots.forEach(group=>{
+      const ex = pickExercise(group, used, prefs.equipment, prefs.location);
+      if(ex){ used.add(ex.id); exercises.push(ex); }
+    });
+    const typeLabel = {full:'Toàn thân',upper:'Thân trên',lower:'Thân dưới',push:'Đẩy (Push)',pull:'Kéo (Pull)'}[type];
+    return {day:WEEKDAYS[i], type, typeLabel, exercises};
+  });
+  state.plan.workoutWeek = week;
+}
+function generateMealPlan(){
+  const fp = state.foodPrefs;
+  const dietKey = fp.diet==='unrestricted' || fp.diet==='halal' || fp.diet==='other' ? 'any' : fp.diet;
+  const targetSplit = {breakfast:0.25, lunch:0.35, dinner:0.30, snack:0.10};
+  const total = state.metrics.target;
+  const dislikeWords = fp.dislikes.toLowerCase().split(',').map(s=>s.trim()).filter(Boolean);
+  function filterPool(type, relaxDislikes){
+    return MEALLIB.filter(m=>{
+      if(m.type!==type) return false;
+      if(dietKey!=='any' && !m.diet.includes(dietKey)) return false;
+      if(m.allergens.some(a=>fp.allergies.includes(a))) return false;
+      if(!relaxDislikes && dislikeWords.some(w=> m.name.toLowerCase().includes(w) || m.ing.join(' ').toLowerCase().includes(w))) return false;
+      return true;
+    });
+  }
+  const plan = {};
+  Object.keys(targetSplit).forEach(type=>{
+    const slotTarget = total*targetSplit[type];
+    let pool = filterPool(type, false);
+    if(pool.length===0) pool = filterPool(type, true);
+    if(pool.length===0) pool = MEALLIB.filter(m=>m.type===type);
+    pool = pool.slice().sort((a,b)=>Math.abs(a.kcal-slotTarget)-Math.abs(b.kcal-slotTarget));
+    plan[type] = pool[0];
+  });
+  state.plan.mealDay = plan;
+}
+
+/* ================= RENDER HELPERS ================= */
+const screenEl = document.getElementById('screen');
+const navEl = document.getElementById('bottomnav');
+function setScreen(html){ screenEl.innerHTML = html; screenEl.scrollTop=0; }
+function el(id){ return document.getElementById(id); }
+function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+
+function renderNav(){
+  navEl.style.display='flex';
+  const items = [
+    {tab:'home',icon:'⌂',label:'Trang chủ'},
+    {tab:'workout',icon:'⚡',label:'Tập luyện'},
+    {tab:'meals',icon:'❖',label:'Bữa ăn'},
+    {tab:'progress',icon:'▲',label:'Tiến độ'},
+    {tab:'profile',icon:'●',label:'Cá nhân'},
+  ];
+  navEl.innerHTML = items.map(it=>`
+    <button class="navitem ${state.currentTab===it.tab?'active':''}" data-tab="${it.tab}" onclick="switchTab('${it.tab}')">
+      <span class="navicon">${it.icon}</span><span>${it.label}</span>
+    </button>`).join('');
+}
+function switchTab(tab){ state.currentTab=tab; renderNav(); renderCurrentTab(); }
+function renderCurrentTab(){
+  if(!state.onboarded){ renderOnboarding(); return; }
+  if(state.currentTab==='home') renderHome();
+  else if(state.currentTab==='workout') renderWorkoutTab();
+  else if(state.currentTab==='meals') renderMealsTab();
+  else if(state.currentTab==='progress') renderProgressTab();
+  else if(state.currentTab==='profile') renderProfileTab();
+}
+
+/* ================= ONBOARDING ================= */
+const OB_STEPS = ['welcome','personal','activity','goal','workoutprefs','foodprefs'];
+function obProgressHtml(){
+  if(state.obStep===0) return '';
+  return `<div class="onboard-progress">${OB_STEPS.slice(1).map((s,i)=>`<span class="${i< state.obStep ? 'done':''}"></span>`).join('')}</div>`;
+}
+function renderOnboarding(){
+  saveState();
+  navEl.style.display='none';
+  const step = OB_STEPS[state.obStep];
+  let body='';
+  if(step==='welcome'){
+    body = `
+      <div style="padding-top:60px;text-align:left;">
+        <p class="eyebrow">FitPlan</p>
+        <h1 style="font-size:32px;font-weight:600;line-height:1.15;margin:6px 0 14px;">Xây dựng phiên bản khỏe mạnh hơn của chính bạn.</h1>
+        <p class="muted">Nhập thông tin một lần — nhận kế hoạch tập luyện và dinh dưỡng cá nhân hóa, có thể thực hiện mỗi ngày.</p>
+        <div style="margin-top:40px;">
+          <button class="btn" onclick="obNext()">Bắt đầu</button>
+        </div>
+      </div>`;
+    setScreen(body);
+    return;
+  }
+  if(step==='personal'){
+    const p=state.profile;
+    body = `
+      <div class="onboard-step">
+        ${obProgressHtml()}
+        <p class="eyebrow">Bước 1 / 5</p>
+        <h2 class="h-page">Thông tin cơ bản</h2>
+        <div class="field"><label>Tên của bạn</label><input type="text" id="ob-name" value="${p.name}" placeholder="Ví dụ: Anh"></div>
+        <div class="row">
+          <div class="col field"><label>Tuổi</label><input type="number" id="ob-age" value="${p.age}" placeholder="25"></div>
+          <div class="col field"><label>Giới tính</label>
+            <select id="ob-sex">
+              <option value="nam" ${p.sex==='nam'?'selected':''}>Nam</option>
+              <option value="nu" ${p.sex==='nu'?'selected':''}>Nữ</option>
+              <option value="khac" ${p.sex==='khac'?'selected':''}>Khác</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col field"><label>Chiều cao (cm)</label><input type="number" id="ob-height" value="${p.height}" placeholder="170"></div>
+          <div class="col field"><label>Cân nặng (kg)</label><input type="number" id="ob-weight" value="${p.weight}" placeholder="65"></div>
+        </div>
+        <div class="row" style="margin-top:24px;">
+          <button class="btn secondary" style="flex:0 0 auto;width:auto;padding:13px 20px;" onclick="obBack()">Quay lại</button>
+          <button class="btn" onclick="obSavePersonal()">Tiếp tục</button>
+        </div>
+      </div>`;
+  }
+  else if(step==='activity'){
+    body = `
+      <div class="onboard-step">
+        ${obProgressHtml()}
+        <p class="eyebrow">Bước 2 / 5</p>
+        <h2 class="h-page">Mức độ hoạt động</h2>
+        <div class="seg" style="flex-direction:column;">
+          ${optRow('activity','sedentary','Ít vận động','Hầu như không tập thể dục')}
+          ${optRow('activity','light','Nhẹ','Tập 1–3 ngày mỗi tuần')}
+          ${optRow('activity','moderate','Vừa','Tập 3–5 ngày mỗi tuần')}
+          ${optRow('activity','high','Cao','Tập 6–7 ngày mỗi tuần')}
+          ${optRow('activity','veryhigh','Rất cao','Vận động hoặc tập luyện cường độ cao')}
+        </div>
+        <div class="row" style="margin-top:24px;">
+          <button class="btn secondary" style="flex:0 0 auto;width:auto;padding:13px 20px;" onclick="obBack()">Quay lại</button>
+          <button class="btn" onclick="obNext()">Tiếp tục</button>
+        </div>
+      </div>`;
+  }
+  else if(step==='goal'){
+    body = `
+      <div class="onboard-step">
+        ${obProgressHtml()}
+        <p class="eyebrow">Bước 3 / 5</p>
+        <h2 class="h-page">Mục tiêu của bạn là gì?</h2>
+        <p class="muted small" style="margin-top:-10px;margin-bottom:16px;">Không có lựa chọn nào là bắt buộc — chọn điều đúng với bạn nhất.</p>
+        <div class="seg" style="flex-direction:column;">
+          ${goalRow('fat_loss','🔥','Giảm cân / giảm mỡ')}
+          ${goalRow('muscle_gain','💪','Tăng cơ')}
+          ${goalRow('maintain','⚖️','Duy trì cân nặng')}
+          ${goalRow('fitness','🏃','Cải thiện thể lực')}
+          ${goalRow('health','🎯','Theo dõi sức khỏe')}
+        </div>
+        <div class="row" style="margin-top:24px;">
+          <button class="btn secondary" style="flex:0 0 auto;width:auto;padding:13px 20px;" onclick="obBack()">Quay lại</button>
+          <button class="btn" id="goal-next" ${state.goal?'':'disabled'} onclick="obNext()">Tiếp tục</button>
+        </div>
+      </div>`;
+  }
+  else if(step==='workoutprefs'){
+    const wp = state.workoutPrefs;
+    body = `
+      <div class="onboard-step">
+        ${obProgressHtml()}
+        <p class="eyebrow">Bước 4 / 5</p>
+        <h2 class="h-page">Sở thích tập luyện</h2>
+        <p class="h-section">Số ngày mỗi tuần</p>
+        <div class="seg" style="margin-bottom:18px;">
+          ${[2,3,4,5,6].map(d=>`<div class="seg-opt c-clay ${wp.days===d?'selected':''}" onclick="setWP('days',${d})">${d}</div>`).join('')}
+        </div>
+        <p class="h-section">Thời lượng mỗi buổi</p>
+        <div class="seg" style="margin-bottom:18px;">
+          ${[20,30,45,60].map(d=>`<div class="seg-opt c-clay ${wp.duration===d?'selected':''}" onclick="setWP('duration',${d})">${d===60?'60 phút+':d+' phút'}</div>`).join('')}
+        </div>
+        <p class="h-section">Địa điểm</p>
+        <div class="seg" style="margin-bottom:18px;">
+          <div class="seg-opt c-clay ${wp.location==='home'?'selected':''}" onclick="setWP('location','home')">🏠 Tại nhà</div>
+          <div class="seg-opt c-clay ${wp.location==='gym'?'selected':''}" onclick="setWP('location','gym')">🏋️ Phòng gym</div>
+          <div class="seg-opt c-clay ${wp.location==='outdoor'?'selected':''}" onclick="setWP('location','outdoor')">🌳 Ngoài trời</div>
+        </div>
+        <p class="h-section">Dụng cụ có sẵn</p>
+        <div class="seg" style="margin-bottom:6px;">
+          ${equipChip('none','Không dụng cụ')}
+          ${equipChip('dumbbell','Tạ đơn')}
+          ${equipChip('band','Dây kháng lực')}
+          ${equipChip('barbell','Đòn tạ')}
+          ${equipChip('machine','Máy tập')}
+        </div>
+        <div class="row" style="margin-top:24px;">
+          <button class="btn secondary" style="flex:0 0 auto;width:auto;padding:13px 20px;" onclick="obBack()">Quay lại</button>
+          <button class="btn" onclick="obNext()">Tiếp tục</button>
+        </div>
+      </div>`;
+  }
+  else if(step==='foodprefs'){
+    const fp = state.foodPrefs;
+    body = `
+      <div class="onboard-step">
+        ${obProgressHtml()}
+        <p class="eyebrow">Bước 5 / 5</p>
+        <h2 class="h-page">Sở thích ăn uống</h2>
+        <p class="h-section">Chế độ ăn</p>
+        <div class="seg" style="flex-direction:column;margin-bottom:18px;">
+          ${dietRow('unrestricted','Không giới hạn')}
+          ${dietRow('vegetarian','Vegetarian')}
+          ${dietRow('vegan','Vegan')}
+          ${dietRow('halal','Halal')}
+        </div>
+        <p class="h-section">Dị ứng thực phẩm</p>
+        <div class="seg" style="margin-bottom:18px;">
+          ${allergyChip('peanut','Đậu phộng')}
+          ${allergyChip('seafood','Hải sản')}
+          ${allergyChip('dairy','Sữa')}
+          ${allergyChip('egg','Trứng')}
+          ${allergyChip('gluten','Gluten')}
+        </div>
+        <div class="field"><label>Thực phẩm không thích (cách nhau bằng dấu phẩy)</label><textarea id="ob-dislikes" placeholder="Ví dụ: bông cải, cá">${fp.dislikes}</textarea></div>
+        <p class="h-section">Ngân sách</p>
+        <div class="seg" style="margin-bottom:6px;">
+          <div class="seg-opt c-moss ${fp.budget==='low'?'selected':''}" onclick="setFP('budget','low')">Tiết kiệm</div>
+          <div class="seg-opt c-moss ${fp.budget==='medium'?'selected':''}" onclick="setFP('budget','medium')">Trung bình</div>
+          <div class="seg-opt c-moss ${fp.budget==='high'?'selected':''}" onclick="setFP('budget','high')">Không giới hạn</div>
+        </div>
+        <div class="row" style="margin-top:24px;">
+          <button class="btn secondary" style="flex:0 0 auto;width:auto;padding:13px 20px;" onclick="obBack()">Quay lại</button>
+          <button class="btn moss" onclick="finishOnboarding()">Tạo kế hoạch của tôi</button>
+        </div>
+      </div>`;
+  }
+  setScreen(body);
+}
+function optRow(field,val,title,sub){
+  const sel = state[field]===val;
+  return `<div class="seg-opt wide c-indigo ${sel?'selected':''}" onclick="setField('${field}','${val}')">
+    <div><div class="opt-title">${title}</div><div class="opt-sub">${sub}</div></div>
+  </div>`;
+}
+function goalRow(val,icon,title){
+  const sel = state.goal===val;
+  return `<div class="seg-opt wide c-clay ${sel?'selected':''}" onclick="setGoal('${val}')">
+    <span style="font-size:20px;">${icon}</span><div class="opt-title">${title}</div>
+  </div>`;
+}
+function dietRow(val,title){
+  const sel = state.foodPrefs.diet===val;
+  return `<div class="seg-opt wide c-moss ${sel?'selected':''}" onclick="setFP('diet','${val}')"><div class="opt-title">${title}</div></div>`;
+}
+function equipChip(val,label){
+  const sel = state.workoutPrefs.equipment.includes(val);
+  return `<span class="chip ${sel?'selected':''}" onclick="toggleEquip('${val}')">${label}</span>`;
+}
+function allergyChip(val,label){
+  const sel = state.foodPrefs.allergies.includes(val);
+  return `<span class="chip ${sel?'selected':''}" onclick="toggleAllergy('${val}')">${label}</span>`;
+}
+function setField(field,val){ state[field]=val; renderOnboarding(); }
+function setGoal(val){ state.goal=val; renderOnboarding(); }
+function setWP(k,v){ state.workoutPrefs[k]=v; renderOnboarding(); }
+function setFP(k,v){ state.foodPrefs[k]=v; renderOnboarding(); }
+function toggleEquip(val){
+  const eq = state.workoutPrefs.equipment;
+  if(val==='none'){ state.workoutPrefs.equipment=['none']; renderOnboarding(); return; }
+  const i = eq.indexOf(val);
+  if(i>-1) eq.splice(i,1); else eq.push(val);
+  const ni = eq.indexOf('none'); if(ni>-1 && eq.length>1) eq.splice(ni,1);
+  if(eq.length===0) eq.push('none');
+  renderOnboarding();
+}
+function toggleAllergy(val){
+  const a = state.foodPrefs.allergies;
+  const i = a.indexOf(val);
+  if(i>-1) a.splice(i,1); else a.push(val);
+  renderOnboarding();
+}
+function obNext(){ state.obStep++; renderOnboarding(); }
+function obBack(){ if(state.obStep>0) state.obStep--; renderOnboarding(); }
+function obSavePersonal(){
+  const name=el('ob-name').value.trim();
+  const age=el('ob-age').value;
+  const sex=el('ob-sex').value;
+  const height=el('ob-height').value;
+  const weight=el('ob-weight').value;
+  if(!age || !height || !weight || parseFloat(height)<=0 || parseFloat(weight)<=0 || parseInt(age)<=0){
+    alert('Vui lòng nhập đầy đủ tuổi, chiều cao và cân nặng hợp lệ.');
+    return;
+  }
+  state.profile = {name:name||'Bạn', age, sex, height, weight};
+  obNext();
+}
+function finishOnboarding(){
+  state.foodPrefs.dislikes = el('ob-dislikes').value.trim();
+  calcMetrics();
+  generateWorkoutPlan();
+  generateMealPlan();
+  state.logs.weightHistory.push({date:new Date(), weight:parseFloat(state.profile.weight)});
+  state.onboarded = true;
+  state.currentTab='home';
+  renderNav();
+  renderHome();
+}
+
+/* ================= HOME ================= */
+function renderHome(){
+  saveState();
+  const m = state.metrics;
+  const td = state.plan.workoutWeek[todayIndex()];
+  const meals = state.plan.mealDay;
+  const loggedKcal = Object.keys(state.today.mealsLogged).filter(k=>state.today.mealsLogged[k]).reduce((s,k)=>s+meals[k].kcal,0);
+  const loggedProtein = Object.keys(state.today.mealsLogged).filter(k=>state.today.mealsLogged[k]).reduce((s,k)=>s+meals[k].p,0);
+  let html = `
+    <p class="eyebrow">Chào buổi sáng</p>
+    <h2 class="h-page">${state.profile.name}</h2>
+    ${m.isMinor ? `<div class="banner warn">${m.note}</div>` : ''}
+    <div class="metric-grid" style="margin-bottom:6px;">
+      <div class="card flat">
+        <div class="metric-label">Calories hôm nay</div>
+        <div class="metric-num">${fmt(loggedKcal)}<span style="font-size:15px;font-weight:500;color:var(--ink-soft);"> / ${fmt(m.target)}</span></div>
+        <div class="progress-track" style="margin-top:8px;"><div class="progress-fill clay" style="width:${Math.min(100, loggedKcal/m.target*100)}%"></div></div>
+      </div>
+      <div class="card flat">
+        <div class="metric-label">Protein hôm nay</div>
+        <div class="metric-num">${fmt(loggedProtein)}<span style="font-size:15px;font-weight:500;color:var(--ink-soft);"> / ${m.protein}g</span></div>
+        <div class="progress-track" style="margin-top:8px;"><div class="progress-fill moss" style="width:${Math.min(100, loggedProtein/m.protein*100)}%"></div></div>
+      </div>
+    </div>
+
+    <div class="h-section" style="margin-top:20px;">Tập luyện hôm nay</div>
+    <div class="card">
+      ${td.type==='rest' ? `
+        <p style="font-weight:600;margin:0 0 4px;">Ngày nghỉ</p>
+        <p class="muted small" style="margin:0;">Cơ thể cần thời gian phục hồi. Hãy đi bộ nhẹ hoặc giãn cơ nếu muốn.</p>
+      ` : `
+        <p style="font-weight:600;margin:0 0 2px;">${td.typeLabel}</p>
+        <p class="muted small" style="margin:0 0 12px;">${td.exercises.length} bài tập · khoảng ${state.workoutPrefs.duration} phút</p>
+        <button class="btn clay" onclick="switchTab('workout')">${state.today.workoutDone ? 'Xem lại buổi tập' : 'Bắt đầu tập luyện'}</button>
+        ${state.today.workoutDone ? '<p class="small moss-text" style="color:var(--moss);margin:10px 0 0;">✓ Đã hoàn thành hôm nay</p>' : ''}
+      `}
+    </div>
+
+    <div class="h-section" style="margin-top:16px;">Bữa ăn hôm nay</div>
+    <div class="card">
+      ${['breakfast','lunch','dinner','snack'].map(t=>{
+        const meal = meals[t];
+        const label = {breakfast:'Bữa sáng',lunch:'Bữa trưa',dinner:'Bữa tối',snack:'Bữa phụ'}[t];
+        return `<div class="mealcard" style="padding:10px 0;">
+          <div style="flex:1;">
+            <div class="small muted">${label}</div>
+            <div style="font-size:14px;font-weight:500;">${meal.name}</div>
+          </div>
+          <div class="small muted">${meal.kcal} kcal</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  setScreen(html);
+}
+
+/* ================= WORKOUT TAB ================= */
+function renderWorkoutTab(){
+  saveState();
+  const week = state.plan.workoutWeek;
+  const sel = state.selectedDayIndex;
+  const day = week[sel];
+  const doneSet = new Set(state.logs.workoutHistory.map(h=>h.dayIndex));
+  let html = `
+    <p class="eyebrow">Tuần này</p>
+    <h2 class="h-page">Tập luyện</h2>
+    <div class="weekcal">
+      ${week.map((d,i)=>`
+        <div class="daybox ${i===todayIndex()?'today':''} ${i===sel?'selected':''}" onclick="selectWorkoutDay(${i})">
+          <div class="dname">${d.day.replace('Thứ ','T').replace('Chủ nhật','CN')}</div>
+          <div class="dmark">${d.type==='rest' ? '–' : (doneSet.has(i) ? '✓' : '·')}</div>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      ${day.type==='rest' ? `
+        <p style="font-weight:600;margin:0 0 4px;">${day.day} · Ngày nghỉ</p>
+        <p class="muted small" style="margin:0;">Không có buổi tập được lên lịch. Nghỉ ngơi là một phần của kế hoạch.</p>
+      ` : `
+        <p style="font-weight:600;margin:0 0 2px;">${day.day} · ${day.typeLabel}</p>
+        <p class="muted small" style="margin:0 0 14px;">${day.exercises.length} bài tập · khoảng ${state.workoutPrefs.duration} phút</p>
+        ${day.exercises.map((ex,i)=>`
+          <div class="exrow" onclick="openExerciseDetail(${sel},${i})">
+            <div class="exnum">${i+1}</div>
+            <div style="flex:1;">
+              <div class="exname">${ex.name}</div>
+              <div class="exsub">${ex.sets} hiệp × ${ex.reps}</div>
+            </div>
+            <span class="muted">›</span>
+          </div>`).join('')}
+        <div style="margin-top:16px;">
+          <button class="btn clay" onclick="startWorkoutSession(${sel})">${sel===todayIndex() && state.today.workoutDone ? 'Tập lại' : 'Bắt đầu buổi tập'}</button>
+        </div>
+      `}
+    </div>
+  `;
+  setScreen(html);
+}
+function selectWorkoutDay(i){ state.selectedDayIndex=i; renderWorkoutTab(); }
+
+function openExerciseDetail(dayIdx, exIdx){
+  const ex = state.plan.workoutWeek[dayIdx].exercises[exIdx];
+  const alts = ex.alt.map(id=>EXLIB.find(e=>e.id===id)).filter(Boolean);
+  const modal = document.getElementById('modal-root');
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal-sheet">
+        <button class="modal-close" onclick="closeModal()">Đóng</button>
+        <h2 style="font-size:22px;font-weight:600;margin:10px 0 2px;">${ex.name}</h2>
+        <p class="muted small" style="margin:0 0 14px;">${groupLabel(ex.group)}</p>
+        <div class="row" style="margin-bottom:16px;">
+          <div class="col card flat" style="text-align:center;padding:12px;"><div class="metric-label">Hiệp × lần</div><div style="font-weight:600;font-size:16px;">${ex.sets} × ${ex.reps}</div></div>
+          <div class="col card flat" style="text-align:center;padding:12px;"><div class="metric-label">Nghỉ giữa hiệp</div><div style="font-weight:600;font-size:16px;">${ex.rest} giây</div></div>
+          <div class="col card flat" style="text-align:center;padding:12px;"><div class="metric-label">Độ khó</div><div style="font-weight:600;font-size:16px;">${ex.diff}</div></div>
+        </div>
+        <p style="font-weight:600;margin:0 0 4px;">Cách thực hiện</p>
+        <p class="muted small" style="margin:0 0 14px;">${ex.cue}</p>
+        <p style="font-weight:600;margin:0 0 4px;">Lỗi thường gặp</p>
+        <p class="muted small" style="margin:0 0 14px;">${ex.mistake}</p>
+        ${alts.length ? `
+          <p style="font-weight:600;margin:0 0 8px;">Không thực hiện được bài này?</p>
+          <div class="seg" style="margin-bottom:6px;">${alts.map(a=>`<div class="seg-opt c-clay" onclick="closeModal()">${a.name}</div>`).join('')}</div>
+        ` : ''}
+      </div>
+    </div>`;
+}
+function groupLabel(g){
+  return {nguc:'Ngực',lung:'Lưng',chan:'Chân',vai:'Vai',tay:'Tay',bung:'Bụng / Cơ lõi',cardio:'Cardio'}[g]||g;
+}
+function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
+
+/* ---- workout session flow ---- */
+function startWorkoutSession(dayIdx){
+  const day = state.plan.workoutWeek[dayIdx];
+  if(day.exercises.length===0) return;
+  state.session = {dayIdx, exIdx:0, setDone:0, phase:'exercise', timer:null, remaining:0};
+  renderSession();
+}
+function currentSessionExercise(){
+  const s = state.session;
+  return state.plan.workoutWeek[s.dayIdx].exercises[s.exIdx];
+}
+function renderSession(){
+  const s = state.session;
+  const day = state.plan.workoutWeek[s.dayIdx];
+  const root = document.getElementById('modal-root');
+  if(s.phase==='summary'){
+    const totalSets = day.exercises.reduce((sum,ex)=>sum+ex.sets,0);
+    root.innerHTML = `
+      <div class="fullscreen-modal" style="align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:44px;">🎉</div>
+        <h2 style="font-size:24px;font-weight:600;margin:14px 0 4px;">Hoàn thành buổi tập</h2>
+        <p class="muted" style="margin:0 0 24px;">${day.typeLabel} · ${day.exercises.length} bài tập · ${totalSets} hiệp</p>
+        <button class="btn clay" style="max-width:220px;" onclick="finishSession()">Xong</button>
+      </div>`;
+    return;
+  }
+  const ex = currentSessionExercise();
+  if(s.phase==='exercise'){
+    const pills = Array.from({length:ex.sets}).map((_,i)=>`<div class="setpill ${i<s.setDone?'done':''}">${i+1}</div>`).join('');
+    root.innerHTML = `
+      <div class="fullscreen-modal">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span class="small muted">Bài ${s.exIdx+1} / ${day.exercises.length}</span>
+          <button class="modal-close" onclick="closeSession()">Thoát</button>
+        </div>
+        <div class="progress-track" style="margin-bottom:22px;"><div class="progress-fill clay" style="width:${(s.exIdx/day.exercises.length)*100}%"></div></div>
+        <h2 style="font-size:26px;font-weight:600;margin:0 0 6px;">${ex.name}</h2>
+        <p class="muted" style="margin:0 0 20px;">${ex.reps} mỗi hiệp</p>
+        <p class="small muted" style="margin:0 0 10px;">${ex.cue}</p>
+        <div style="flex:1;"></div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:22px;flex-wrap:wrap;">${pills}</div>
+        <button class="btn clay" onclick="completeSet()">Hoàn thành hiệp ${s.setDone+1}</button>
+      </div>`;
+  } else if(s.phase==='rest'){
+    root.innerHTML = `
+      <div class="fullscreen-modal" style="align-items:center;justify-content:center;text-align:center;">
+        <p class="muted" style="margin:0 0 8px;">Nghỉ giữa hiệp</p>
+        <div class="rest-ring" id="rest-num">${s.remaining}</div>
+        <p class="small muted" style="margin:14px 0 26px;">Bài tiếp theo: ${s.exIdx+1<day.exercises.length ? day.exercises[s.exIdx+ (s.setDone>=ex.sets?1:0)]?.name || ex.name : 'Hoàn tất'}</p>
+        <button class="btn secondary" style="max-width:200px;" onclick="skipRest()">Bỏ qua nghỉ</button>
+      </div>`;
+    clearInterval(s.timer);
+    s.timer = setInterval(()=>{
+      s.remaining--;
+      const numEl = document.getElementById('rest-num');
+      if(numEl) numEl.textContent = s.remaining;
+      if(s.remaining<=0){ clearInterval(s.timer); afterRest(); }
+    },1000);
+  }
+}
+function completeSet(){
+  const s = state.session;
+  const ex = currentSessionExercise();
+  s.setDone++;
+  if(s.setDone>=ex.sets){
+    if(s.exIdx>=state.plan.workoutWeek[s.dayIdx].exercises.length-1){
+      s.phase='summary'; renderSession(); return;
+    }
+    s.phase='rest'; s.remaining=ex.rest; renderSession();
+  } else {
+    s.phase='rest'; s.remaining=ex.rest; renderSession();
+  }
+}
+function afterRest(){
+  const s = state.session;
+  const day = state.plan.workoutWeek[s.dayIdx];
+  const ex = day.exercises[s.exIdx];
+  if(s.setDone>=ex.sets){
+    s.exIdx++; s.setDone=0;
+    if(s.exIdx>=day.exercises.length){ s.phase='summary'; renderSession(); return; }
+  }
+  s.phase='exercise';
+  renderSession();
+}
+function skipRest(){ clearInterval(state.session.timer); afterRest(); }
+function closeSession(){ clearInterval(state.session?.timer); state.session=null; closeModal(); renderWorkoutTab(); }
+function finishSession(){
+  const s = state.session;
+  const dayIdx = s.dayIdx;
+  if(!state.logs.workoutHistory.find(h=>h.dayIndex===dayIdx && sameWeek(h.date))){
+    state.logs.workoutHistory.push({dayIndex:dayIdx, date:new Date()});
+  }
+  if(dayIdx===todayIndex()) state.today.workoutDone = true;
+  state.session=null;
+  closeModal();
+  renderNav();
+  renderCurrentTab();
+}
+function sameWeek(d){ return true; }
+
+/* ================= MEALS TAB ================= */
+function renderMealsTab(){
+  saveState();
+  const m = state.metrics;
+  const meals = state.plan.mealDay;
+  const loggedKcal = Object.keys(state.today.mealsLogged).filter(k=>state.today.mealsLogged[k]).reduce((s,k)=>s+meals[k].kcal,0);
+  const loggedP = Object.keys(state.today.mealsLogged).filter(k=>state.today.mealsLogged[k]).reduce((s,k)=>s+meals[k].p,0);
+  const loggedC = Object.keys(state.today.mealsLogged).filter(k=>state.today.mealsLogged[k]).reduce((s,k)=>s+meals[k].c,0);
+  const loggedF = Object.keys(state.today.mealsLogged).filter(k=>state.today.mealsLogged[k]).reduce((s,k)=>s+meals[k].f,0);
+  let html = `
+    <p class="eyebrow">Hôm nay</p>
+    <h2 class="h-page">Dinh dưỡng</h2>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+        <span class="metric-num" style="font-size:26px;">${fmt(loggedKcal)}</span>
+        <span class="muted small">trên ${fmt(m.target)} kcal mục tiêu</span>
+      </div>
+      <div class="progress-track" style="margin-bottom:16px;"><div class="progress-fill moss" style="width:${Math.min(100,loggedKcal/m.target*100)}%"></div></div>
+      <div class="row">
+        <div class="col" style="text-align:center;"><div class="metric-label">Protein</div><div style="font-weight:600;">${loggedP} / ${m.protein}g</div></div>
+        <div class="col" style="text-align:center;"><div class="metric-label">Carbs</div><div style="font-weight:600;">${loggedC} / ${m.carbs}g</div></div>
+        <div class="col" style="text-align:center;"><div class="metric-label">Fat</div><div style="font-weight:600;">${loggedF} / ${m.fat}g</div></div>
+      </div>
+    </div>
+    <div class="h-section" style="margin-top:16px;">Thực đơn hôm nay</div>
+    <div class="card">
+      ${['breakfast','lunch','dinner','snack'].map(t=>{
+        const meal = meals[t];
+        const label = {breakfast:'Bữa sáng',lunch:'Bữa trưa',dinner:'Bữa tối',snack:'Bữa phụ'}[t];
+        const logged = !!state.today.mealsLogged[t];
+        return `<div class="mealcard">
+          <button class="checkbtn ${logged?'done':''}" onclick="toggleMealLogged('${t}')">${logged?'✓':''}</button>
+          <div style="flex:1;">
+            <div class="mealtag">${label}</div>
+            <div class="mealname" onclick="openMealDetail('${t}')">${meal.name}</div>
+            <div class="mealkcal">${meal.kcal} kcal · P${meal.p} C${meal.c} F${meal.f}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  setScreen(html);
+}
+function toggleMealLogged(t){ state.today.mealsLogged[t] = !state.today.mealsLogged[t]; renderMealsTab(); }
+function openMealDetail(t){
+  const meal = state.plan.mealDay[t];
+  const dietKey = state.foodPrefs.diet==='unrestricted'||state.foodPrefs.diet==='halal'||state.foodPrefs.diet==='other' ? 'any' : state.foodPrefs.diet;
+  const options = MEALLIB.filter(x=>x.type===t && x.id!==meal.id && (dietKey==='any'||x.diet.includes(dietKey)) && !x.allergens.some(a=>state.foodPrefs.allergies.includes(a)));
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal-sheet">
+        <button class="modal-close" onclick="closeModal()">Đóng</button>
+        <h2 style="font-size:22px;font-weight:600;margin:10px 0 2px;">${meal.name}</h2>
+        <p class="muted small" style="margin:0 0 14px;">${meal.kcal} kcal</p>
+        <div class="row" style="margin-bottom:16px;">
+          <div class="col card flat" style="text-align:center;padding:12px;"><div class="metric-label">Protein</div><div style="font-weight:600;">${meal.p}g</div></div>
+          <div class="col card flat" style="text-align:center;padding:12px;"><div class="metric-label">Carbs</div><div style="font-weight:600;">${meal.c}g</div></div>
+          <div class="col card flat" style="text-align:center;padding:12px;"><div class="metric-label">Fat</div><div style="font-weight:600;">${meal.f}g</div></div>
+        </div>
+        <p style="font-weight:600;margin:0 0 6px;">Nguyên liệu</p>
+        <p class="muted small" style="margin:0 0 14px;">${meal.ing.join(', ')}</p>
+        <p style="font-weight:600;margin:0 0 6px;">Cách làm</p>
+        <ol class="muted small" style="margin:0 0 16px;padding-left:18px;">${meal.steps.map(s=>`<li style="margin-bottom:4px;">${s}</li>`).join('')}</ol>
+        ${options.length ? `
+          <p style="font-weight:600;margin:0 0 8px;">Không thích món này?</p>
+          <div class="seg" style="flex-direction:column;">
+            ${options.slice(0,3).map(o=>`<div class="seg-opt wide c-moss" onclick="replaceMeal('${t}','${o.id}')"><div><div class="opt-title">${o.name}</div><div class="opt-sub">${o.kcal} kcal</div></div></div>`).join('')}
+          </div>
+        ` : ''}
+      </div>
+    </div>`;
+}
+function replaceMeal(t,newId){
+  state.plan.mealDay[t] = MEALLIB.find(m=>m.id===newId);
+  closeModal();
+  renderMealsTab();
+}
+
+/* ================= PROGRESS TAB ================= */
+function renderProgressTab(){
+  saveState();
+  const hist = state.logs.weightHistory;
+  const weeksTrained = state.logs.workoutHistory.length;
+  const weeklyTarget = state.workoutPrefs.days;
+  let html = `
+    <p class="eyebrow">Theo dõi</p>
+    <h2 class="h-page">Tiến độ</h2>
+    <div class="h-section">Cân nặng</div>
+    <div class="card">
+      ${weightChartSvg(hist)}
+      <button class="btn plum small-btn" style="margin-top:12px;" onclick="promptWeight()">Cập nhật cân nặng</button>
+    </div>
+    <div class="metric-grid">
+      <div class="card flat"><div class="metric-label">Buổi tập đã hoàn thành</div><div class="metric-num">${weeksTrained}</div></div>
+      <div class="card flat"><div class="metric-label">Mục tiêu mỗi tuần</div><div class="metric-num">${weeklyTarget}</div></div>
+    </div>
+    <div class="h-section" style="margin-top:16px;">Lịch sử cân nặng</div>
+    <div class="card">
+      ${hist.slice().reverse().map(h=>`<div class="weight-chip"><span class="muted">${h.date.toLocaleDateString('vi-VN')}</span><span style="font-weight:600;">${h.weight} kg</span></div>`).join('')}
+    </div>
+  `;
+  setScreen(html);
+}
+function weightChartSvg(hist){
+  if(hist.length<2){
+    return `<p class="muted small">Cập nhật cân nặng thêm vài lần để xem biểu đồ tiến độ.</p>`;
+  }
+  const w=300,h=110,pad=10;
+  const weights = hist.map(x=>x.weight);
+  const min = Math.min(...weights)-0.5, max = Math.max(...weights)+0.5;
+  const pts = hist.map((x,i)=>{
+    const px = pad + (i/(hist.length-1))*(w-2*pad);
+    const py = h-pad - ((x.weight-min)/(max-min))*(h-2*pad);
+    return `${px},${py}`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#6B4058" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map(p=>{const [x,y]=p.split(',');return `<circle cx="${x}" cy="${y}" r="3" fill="#6B4058"/>`;}).join('')}
+  </svg>`;
+}
+function promptWeight(){
+  const v = prompt('Cân nặng hiện tại (kg):', state.profile.weight);
+  if(v===null) return;
+  const n = parseFloat(v);
+  if(!n || n<=0){ alert('Vui lòng nhập số hợp lệ.'); return; }
+  state.profile.weight = n;
+  state.logs.weightHistory.push({date:new Date(), weight:n});
+  calcMetrics();
+  renderProgressTab();
+}
+
+/* ================= PROFILE TAB ================= */
+function renderProfileTab(){
+  saveState();
+  const p = state.profile, m = state.metrics;
+  let html = `
+    <p class="eyebrow">Hồ sơ</p>
+    <h2 class="h-page">${p.name}</h2>
+    <div class="metric-grid">
+      <div class="card flat"><div class="metric-label">Cân nặng</div><div class="metric-num" style="font-size:24px;">${p.weight} kg</div></div>
+      <div class="card flat"><div class="metric-label">Chiều cao</div><div class="metric-num" style="font-size:24px;">${p.height} cm</div></div>
+      <div class="card flat"><div class="metric-label">BMI</div><div class="metric-num" style="font-size:24px;">${m.bmi}</div><div class="metric-label">${m.bmiLabel}</div></div>
+      <div class="card flat"><div class="metric-label">TDEE ước tính</div><div class="metric-num" style="font-size:24px;">${fmt(m.tdee)}</div></div>
+    </div>
+    <div class="h-section" style="margin-top:16px;">Thông tin</div>
+    <div class="card">
+      <div class="weight-chip"><span class="muted">Mục tiêu</span><span style="font-weight:600;">${GOAL_LABELS[state.goal]}</span></div>
+      <div class="weight-chip"><span class="muted">Mức hoạt động</span><span style="font-weight:600;">${ACTIVITY_LABELS[state.activity]}</span></div>
+      <div class="weight-chip"><span class="muted">Tập luyện</span><span style="font-weight:600;">${state.workoutPrefs.days} ngày / tuần</span></div>
+      <div class="weight-chip"><span class="muted">Chế độ ăn</span><span style="font-weight:600;">${dietLabel(state.foodPrefs.diet)}</span></div>
+    </div>
+    <div class="h-section" style="margin-top:16px;">Tuỳ chọn</div>
+    <div class="card">
+      <button class="btn secondary" style="margin-bottom:10px;" onclick="editProfile()">Chỉnh sửa thông tin cá nhân</button>
+      <button class="btn secondary" style="margin-bottom:10px;" onclick="recalcAll()">Tính lại kế hoạch</button>
+      <button class="btn ghost" style="color:var(--danger);" onclick="resetApp()">Bắt đầu lại từ đầu</button>
+    </div>
+  `;
+  setScreen(html);
+}
+function dietLabel(d){ return {unrestricted:'Không giới hạn',vegetarian:'Vegetarian',vegan:'Vegan',halal:'Halal',other:'Khác'}[d]||d; }
+function editProfile(){
+  const p = state.profile;
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal-sheet">
+        <button class="modal-close" onclick="closeModal()">Đóng</button>
+        <h2 style="font-size:20px;font-weight:600;margin:10px 0 16px;">Chỉnh sửa thông tin</h2>
+        <div class="field"><label>Tên</label><input type="text" id="ed-name" value="${p.name}"></div>
+        <div class="row">
+          <div class="col field"><label>Tuổi</label><input type="number" id="ed-age" value="${p.age}"></div>
+          <div class="col field"><label>Cân nặng (kg)</label><input type="number" id="ed-weight" value="${p.weight}"></div>
+        </div>
+        <div class="field"><label>Chiều cao (cm)</label><input type="number" id="ed-height" value="${p.height}"></div>
+        <button class="btn indigo" onclick="saveProfileEdit()">Lưu thay đổi</button>
+      </div>
+    </div>`;
+}
+function saveProfileEdit(){
+  const age=el('ed-age').value, height=el('ed-height').value, weight=el('ed-weight').value, name=el('ed-name').value.trim();
+  if(!age||!height||!weight||parseFloat(height)<=0||parseFloat(weight)<=0){ alert('Vui lòng nhập giá trị hợp lệ.'); return; }
+  const weightChanged = parseFloat(weight)!==parseFloat(state.profile.weight);
+  state.profile = {...state.profile, name:name||state.profile.name, age, height, weight};
+  if(weightChanged) state.logs.weightHistory.push({date:new Date(), weight:parseFloat(weight)});
+  calcMetrics();
+  closeModal();
+  renderProfileTab();
+}
+function recalcAll(){
+  calcMetrics();
+  generateWorkoutPlan();
+  generateMealPlan();
+  state.today = {mealsLogged:{}, workoutDone:false};
+  renderProfileTab();
+}
+function resetApp(){
+  if(!confirm('Xoá toàn bộ dữ liệu và bắt đầu lại từ đầu?')) return;
+  clearState();
+  state = {
+    onboarded:false, obStep:0, currentTab:'home',
+    profile:{name:'',age:'',sex:'nam',height:'',weight:''},
+    activity:'moderate', goal:null,
+    workoutPrefs:{days:3,duration:30,location:'home',equipment:['none']},
+    foodPrefs:{diet:'unrestricted',allergies:[],dislikes:'',budget:'medium'},
+    metrics:null, plan:{workoutWeek:null,mealDay:null},
+    logs:{weightHistory:[],workoutHistory:[]},
+    today:{mealsLogged:{},workoutDone:false}, session:null, selectedDayIndex:0,
+  };
+  navEl.style.display='none';
+  renderOnboarding();
+}
+
+/* ================= CLOCK ================= */
+function tickClock(){
+  const d = new Date();
+  el('clock').textContent = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+setInterval(tickClock,1000*20);
+tickClock();
+
+/* ================= INIT ================= */
+function initApp(){
+  const loaded = loadState();
+  const ready = loaded && state.onboarded && state.metrics && state.plan && state.plan.workoutWeek && state.plan.mealDay;
+  if(ready){
+    renderNav();
+    renderCurrentTab();
+  } else {
+    state.onboarded = false;
+    renderOnboarding();
+  }
+}
+initApp();
+</script>
+</body>
+</html>
